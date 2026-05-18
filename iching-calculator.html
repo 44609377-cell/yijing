@@ -1,0 +1,663 @@
+<!DOCTYPE html>
+<html lang="zh-CN" data-theme="light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>易经起卦工具·正统权威版</title>
+<link href="https://api.fontshare.com/v2/css?f[]=satoshi@400,500,700&display=swap" rel="stylesheet">
+<style>
+:root,[data-theme="light"]{
+  --color-bg:#f7f4ee;--color-surface:#faf8f3;--color-surface-2:#fcfbf8;
+  --color-surface-offset:#f0ece3;--color-border:oklch(0.3 0.01 60/0.12);
+  --color-text:#2a2316;--color-text-muted:#7a7060;--color-text-faint:#b8b0a4;
+  --color-primary:#8b5e3c;--color-primary-hover:#6d4528;--color-primary-highlight:#e8ddd0;
+  --color-gold:#c49a2a;--color-gold-bg:#fdf8ec;
+  --color-error:#c0392b;--color-error-bg:#fdf0ee;
+  --shadow-sm:0 1px 3px oklch(0.2 0.02 60/0.08);
+  --shadow-md:0 4px 16px oklch(0.2 0.02 60/0.12);
+  --radius-sm:0.375rem;--radius-md:0.5rem;--radius-lg:0.75rem;--radius-xl:1rem;--radius-full:9999px;
+  --text-xs:clamp(0.75rem,0.7rem+0.25vw,0.875rem);
+  --text-sm:clamp(0.875rem,0.8rem+0.35vw,1rem);
+  --text-base:clamp(1rem,0.95rem+0.25vw,1.125rem);
+  --text-lg:clamp(1.125rem,1rem+0.75vw,1.5rem);
+  --font-body:'Satoshi',sans-serif;--transition:180ms cubic-bezier(0.16,1,0.3,1);
+}
+[data-theme="dark"]{
+  --color-bg:#1a160f;--color-surface:#201c14;--color-surface-2:#252017;
+  --color-surface-offset:#2a2419;--color-border:oklch(0.9 0.01 60/0.10);
+  --color-text:#e8dfd0;--color-text-muted:#8a8070;--color-text-faint:#5a5045;
+  --color-primary:#c4895a;--color-primary-hover:#e0a878;--color-primary-highlight:#3a2a1a;
+  --color-gold:#d4aa3a;--color-gold-bg:#2a2010;
+  --color-error:#e07070;--color-error-bg:#2a1515;
+  --shadow-sm:0 1px 3px oklch(0 0 0/0.3);--shadow-md:0 4px 16px oklch(0 0 0/0.4);
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{-webkit-font-smoothing:antialiased;scroll-behavior:smooth}
+body{min-height:100dvh;font-family:var(--font-body);font-size:var(--text-base);color:var(--color-text);background:var(--color-bg);line-height:1.6}
+button{cursor:pointer;font:inherit;color:inherit;background:none;border:none}
+a,button{transition:color var(--transition),background var(--transition),box-shadow var(--transition)}
+.container{max-width:960px;margin-inline:auto;padding-inline:clamp(1rem,4vw,2rem)}
+header{background:var(--color-surface);border-bottom:1px solid var(--color-border);padding:0.875rem 0;position:sticky;top:0;z-index:100;backdrop-filter:blur(8px)}
+.header-inner{display:flex;align-items:center;justify-content:space-between}
+.logo{display:flex;align-items:center;gap:0.625rem}
+.logo-text{font-size:var(--text-lg);font-weight:700}
+.logo-sub{font-size:var(--text-xs);color:var(--color-text-muted)}
+.theme-btn{width:38px;height:38px;border-radius:var(--radius-full);display:flex;align-items:center;justify-content:center;background:var(--color-surface-offset);color:var(--color-text-muted);border:1px solid var(--color-border)}
+.theme-btn:hover{color:var(--color-text);background:var(--color-primary-highlight)}
+main{padding-block:clamp(1.5rem,4vw,3rem)}
+.card{background:var(--color-surface);border:1px solid var(--color-border);border-radius:var(--radius-xl);padding:clamp(1.25rem,3vw,1.75rem);box-shadow:var(--shadow-sm)}
+.card+.card{margin-top:1.25rem}
+.stitle{font-size:var(--text-lg);font-weight:700;margin-bottom:0.25rem}
+.ssub{font-size:var(--text-sm);color:var(--color-text-muted);margin-bottom:1.25rem}
+
+/* 输入三格 */
+.igrid3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:1rem}
+@media(max-width:600px){.igrid3{grid-template-columns:1fr}}
+.field{display:flex;flex-direction:column;gap:0.35rem}
+.field label{font-size:var(--text-sm);font-weight:600;color:var(--color-text-muted)}
+.field-role{font-size:var(--text-xs);color:var(--color-primary);font-weight:600;margin-bottom:0.15rem}
+.field input{background:var(--color-surface-2);border:1px solid var(--color-border);border-radius:var(--radius-md);padding:0.65rem 0.875rem;font-size:var(--text-lg);color:var(--color-text);outline:none;text-align:center;font-weight:700}
+.field input:focus{border-color:var(--color-primary);box-shadow:0 0 0 3px oklch(from var(--color-primary) l c h/0.15)}
+.field input.invalid{border-color:var(--color-error);background:var(--color-error-bg)}
+.hint{font-size:var(--text-xs);color:var(--color-text-faint);margin-top:0.2rem;text-align:center}
+
+.brow{display:flex;gap:0.625rem;margin-top:1.25rem;flex-wrap:wrap}
+.btn-p{background:var(--color-primary);color:#fff;border-radius:var(--radius-md);padding:0.625rem 1.75rem;font-size:var(--text-sm);font-weight:600}
+.btn-p:hover{background:var(--color-primary-hover)}
+.btn-s{background:var(--color-surface-offset);color:var(--color-text);border-radius:var(--radius-md);padding:0.625rem 1.25rem;font-size:var(--text-sm);font-weight:500;border:1px solid var(--color-border)}
+.btn-s:hover{background:var(--color-primary-highlight);color:var(--color-primary)}
+
+.notice{background:var(--color-error-bg);border:1px solid oklch(from var(--color-error) l c h/0.3);border-radius:var(--radius-md);padding:0.75rem 1rem;font-size:var(--text-sm);color:var(--color-error);margin-top:0.75rem;display:none}
+
+/* 规则提示 */
+.rules-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:0.75rem;margin-bottom:1rem}
+@media(max-width:600px){.rules-grid{grid-template-columns:1fr}}
+.rule-item{background:var(--color-surface-offset);border-radius:var(--radius-md);padding:0.75rem 1rem;font-size:var(--text-xs)}
+.rule-item .ri-title{font-weight:700;color:var(--color-text);margin-bottom:0.25rem;font-size:var(--text-sm)}
+.rule-item .ri-sub{color:var(--color-text-muted)}
+
+#result{display:none;margin-top:1.25rem}
+.calcbox{background:var(--color-surface-offset);border-radius:var(--radius-md);padding:1rem 1.25rem;font-size:var(--text-sm);color:var(--color-text-muted);line-height:2.2}
+.calcbox strong{color:var(--color-text)}
+.tag{border-radius:var(--radius-sm);padding:0.1em 0.5em;font-size:var(--text-xs);font-weight:600;display:inline-block}
+.tag-def{background:var(--color-primary-highlight);color:var(--color-primary)}
+.tag-yang{background:#fde8e8;color:#c0392b}
+.tag-yin{background:#e8f0fd;color:#2c5f8a}
+.tag-dong{background:var(--color-gold-bg);color:var(--color-gold);border:1px solid oklch(from var(--color-gold) l c h/0.3)}
+[data-theme="dark"] .tag-yang{background:#3a1515;color:#e07070}
+[data-theme="dark"] .tag-yin{background:#152030;color:#6090cc}
+
+.hexgrid{display:flex;flex-direction:column;gap:1rem;margin-top:1rem}
+.hex-row-main{display:grid;grid-template-columns:1fr 1fr;gap:1rem}
+.hex-row-sub{display:grid;grid-template-columns:1fr 1fr 1fr;gap:1rem}
+@media(max-width:480px){.hex-row-main{grid-template-columns:1fr}.hex-row-sub{grid-template-columns:1fr}}
+.row-label{font-size:var(--text-xs);color:var(--color-text-faint);font-weight:600;letter-spacing:0.08em;text-transform:uppercase;padding:0.25rem 0 0.25rem 0.25rem;border-left:2px solid var(--color-border)}
+.hcard{background:var(--color-surface-2);border:1px solid var(--color-border);border-radius:var(--radius-lg);padding:1.25rem 1rem;text-align:center;transition:box-shadow var(--transition),transform var(--transition)}
+.hcard:hover{box-shadow:var(--shadow-md);transform:translateY(-2px)}
+.hcard.main{border-color:var(--color-gold);background:var(--color-gold-bg);box-shadow:0 0 0 1px var(--color-gold)}
+.hlabel{font-size:var(--text-xs);color:var(--color-text-muted);font-weight:600;letter-spacing:0.06em;text-transform:uppercase;margin-bottom:0.5rem}
+.hname{font-size:var(--text-lg);font-weight:700;margin:0.25rem 0}
+.htri{font-size:var(--text-xs);color:var(--color-text-muted)}
+.yao-wrap{display:flex;flex-direction:column;align-items:center;gap:5px;margin:0.625rem auto;width:fit-content}
+.yao-row{display:flex;align-items:center;gap:3px}
+.yao-num{font-size:10px;color:var(--color-text-faint);width:14px;text-align:right}
+.bar{height:7px;border-radius:2px;background:var(--color-text)}
+.yang-bar{width:44px}
+.yin-l{width:18px}.yin-r{width:18px;margin-left:7px}
+.moving .bar{background:var(--color-gold)!important}
+.moving .yao-num{color:var(--color-gold);font-weight:700}
+
+.ref-table{width:100%;border-collapse:collapse;font-size:var(--text-sm)}
+.ref-table th{background:var(--color-surface-offset);color:var(--color-text-muted);font-weight:600;font-size:var(--text-xs);text-align:left;padding:0.5rem 0.75rem;border-bottom:1px solid var(--color-border)}
+.ref-table td{padding:0.5rem 0.75rem;border-bottom:1px solid var(--color-border)}
+.ref-table tr:last-child td{border-bottom:none}
+.ref-table tr:hover td{background:var(--color-surface-offset)}
+.mono{font-family:monospace;color:var(--color-primary);font-size:var(--text-sm)}
+
+.full-table-wrap{overflow-x:auto;margin-top:1rem}
+.ftable{width:100%;border-collapse:collapse;font-size:var(--text-xs)}
+.ftable th{background:var(--color-surface-offset);color:var(--color-text-muted);font-weight:600;padding:0.4rem 0.6rem;border-bottom:1px solid var(--color-border);white-space:nowrap}
+.ftable td{padding:0.4rem 0.6rem;border-bottom:1px solid var(--color-border);white-space:nowrap}
+.ftable tr:hover td{background:var(--color-surface-offset)}
+.ftable tr.highlight td{background:var(--color-gold-bg)!important}
+
+/* 汇总摘要 */
+.summary-box{background:var(--color-surface-2);border:1px solid var(--color-border);border-radius:var(--radius-lg);padding:1rem 1.25rem;margin-top:1rem;position:relative}
+.summary-text{font-size:var(--text-sm);line-height:2;color:var(--color-text);white-space:pre-wrap;font-family:monospace}
+.copy-btn{position:absolute;top:0.75rem;right:0.75rem;background:var(--color-primary-highlight);color:var(--color-primary);border-radius:var(--radius-md);padding:0.35rem 0.875rem;font-size:var(--text-xs);font-weight:600;border:1px solid oklch(from var(--color-primary) l c h/0.2)}
+.copy-btn:hover{background:var(--color-primary);color:#fff}
+.copy-btn.copied{background:var(--color-primary);color:#fff}
+
+/* 六爻详解 */
+.yao-detail-table{width:100%;border-collapse:collapse;font-size:var(--text-sm)}
+.yao-detail-table th{background:var(--color-surface-offset);color:var(--color-text-muted);font-weight:600;font-size:var(--text-xs);padding:0.5rem 0.75rem;border-bottom:1px solid var(--color-border);text-align:center}
+.yao-detail-table td{padding:0.55rem 0.75rem;border-bottom:1px solid var(--color-border);text-align:center;vertical-align:middle}
+.yao-detail-table tr:last-child td{border-bottom:none}
+.yao-detail-table tr:hover td{background:var(--color-surface-offset)}
+.yao-detail-table tr.dong-row td{background:var(--color-gold-bg)!important;font-weight:600}
+.tag-ok{background:#e8f5e9;color:#2e7d32;border-radius:var(--radius-sm);padding:0.1em 0.45em;font-size:var(--text-xs);font-weight:600}
+.tag-no{background:var(--color-surface-offset);color:var(--color-text-muted);border-radius:var(--radius-sm);padding:0.1em 0.45em;font-size:var(--text-xs)}
+.tag-warn{background:#fff3e0;color:#e65100;border-radius:var(--radius-sm);padding:0.1em 0.45em;font-size:var(--text-xs);font-weight:600}
+.tag-zhongzheng{background:var(--color-primary-highlight);color:var(--color-primary);border-radius:var(--radius-sm);padding:0.1em 0.45em;font-size:var(--text-xs);font-weight:700}
+[data-theme="dark"] .tag-ok{background:#1b3a1e;color:#66bb6a}
+[data-theme="dark"] .tag-warn{background:#3a2000;color:#ffa726}
+.gua-summary-grid{display:grid;grid-template-columns:1fr 1fr;gap:0.75rem;margin-bottom:1.25rem}
+@media(max-width:480px){.gua-summary-grid{grid-template-columns:1fr}}
+.gua-item{background:var(--color-surface-offset);border-radius:var(--radius-md);padding:0.75rem 1rem}
+.gua-item-label{font-size:var(--text-xs);color:var(--color-text-muted);font-weight:600;margin-bottom:0.3rem}
+.gua-item-val{font-size:var(--text-sm);color:var(--color-text);font-weight:600}
+.gua-item-desc{font-size:var(--text-xs);color:var(--color-text-muted);margin-top:0.2rem;line-height:1.5}
+.dong-badge{background:var(--color-gold);color:#fff;border-radius:var(--radius-full);padding:0.1em 0.5em;font-size:10px;font-weight:700;margin-left:0.3rem}
+</style>
+</head>
+<body>
+<header>
+<div class="container"><div class="header-inner">
+  <div class="logo">
+    <svg width="32" height="32" viewBox="0 0 32 32" fill="none">
+      <rect width="32" height="32" rx="7" fill="var(--color-primary)" opacity="0.18"/>
+      <rect x="6" y="7" width="20" height="4" rx="2" fill="var(--color-primary)"/>
+      <rect x="6" y="14" width="8" height="4" rx="2" fill="var(--color-primary)"/>
+      <rect x="18" y="14" width="8" height="4" rx="2" fill="var(--color-primary)"/>
+      <rect x="6" y="21" width="20" height="4" rx="2" fill="var(--color-primary)"/>
+    </svg>
+    <div>
+      <div class="logo-text">易经起卦工具</div>
+      <div class="logo-sub">正统权威版 · 三数起卦 · 静态查表</div>
+    </div>
+  </div>
+  <button class="theme-btn" data-theme-toggle aria-label="切换主题">
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>
+  </button>
+</div></div>
+</header>
+
+<main><div class="container">
+
+<div class="card">
+  <div class="stitle">数字起卦</div>
+  <div class="ssub">来访者凭直觉随口说出三组数字，填入下方</div>
+
+  <div class="rules-grid">
+    <div class="rule-item">
+      <div class="ri-title">① 第一组数 → 下卦</div>
+      <div class="ri-sub">÷8取余，余0取8=坤<br>≤8直接作先天数</div>
+    </div>
+    <div class="rule-item">
+      <div class="ri-title">② 第二组数 → 上卦</div>
+      <div class="ri-sub">÷8取余，余0取8=坤<br>≤8直接作先天数</div>
+    </div>
+    <div class="rule-item">
+      <div class="ri-title">③ 第三组数 → 动爻</div>
+      <div class="ri-sub">÷6取余，余0取6<br>≤6直接作动爻序号</div>
+    </div>
+  </div>
+
+  <div class="igrid3">
+    <div class="field">
+      <div class="field-role">第一组（下卦）</div>
+      <input type="number" id="n1" min="1" placeholder="如 130" oninput="validateInput(this,8)">
+      <div class="hint">÷8定下卦</div>
+    </div>
+    <div class="field">
+      <div class="field-role">第二组（上卦）</div>
+      <input type="number" id="n2" min="1" placeholder="如 174" oninput="validateInput(this,8)">
+      <div class="hint">÷8定上卦</div>
+    </div>
+    <div class="field">
+      <div class="field-role">第三组（动爻）</div>
+      <input type="number" id="n3" min="1" placeholder="如 314" oninput="validateInput(this,6)">
+      <div class="hint">÷6定动爻</div>
+    </div>
+  </div>
+
+  <div id="noticeMsg" class="notice"></div>
+
+  <div class="brow">
+    <button class="btn-p" onclick="calc()">▶ 起卦</button>
+    <button class="btn-s" onclick="randCalc()">🎲 随机</button>
+    <button class="btn-s" onclick="clearAll()">✕ 清除</button>
+  </div>
+</div>
+
+<div id="result">
+  <div class="card"><div class="stitle">计算过程</div><div id="calcBox" class="calcbox"></div></div>
+  <div class="card">
+    <div class="stitle">五卦推演</div>
+    <div class="ssub">全部静态查表得出，零手算 · 精确无误</div>
+    <div class="hexgrid" id="hexGrid"></div>
+  </div>
+  <div class="card" id="yaoDetailCard">
+    <div class="stitle">六爻详解</div>
+    <div class="ssub">时 · 位 · 德 · 应 · 比，完整六维分析</div>
+    <div class="gua-summary-grid" id="guaSummaryGrid"></div>
+    <div style="overflow-x:auto"><table class="yao-detail-table" id="yaoDetailTable"></table></div>
+  </div>
+  <div class="card">
+    <div class="stitle">卦象汇总</div>
+    <div class="ssub">可直接复制，用于下一步解卦操作</div>
+    <div class="summary-box">
+      <button class="copy-btn" onclick="copySummary(this)">复制</button>
+      <div class="summary-text" id="summaryText"></div>
+    </div>
+  </div>
+</div>
+
+<div class="card" style="margin-top:1.25rem">
+  <div class="stitle">八卦速查（先天八卦数理）</div>
+  <div class="ssub">乾1 兑2 离3 震4 巽5 坎6 艮7 坤8 · 余0取8</div>
+  <div style="overflow-x:auto"><table class="ref-table" id="triTable"></table></div>
+</div>
+
+<div class="card" style="margin-top:1.25rem">
+  <div class="stitle">六十四卦完整静态查表</div>
+  <div class="ssub">起卦后本卦行高亮 · 含互/综/错及每爻动之卦</div>
+  <div class="full-table-wrap"><table class="ftable" id="fullTable"></table></div>
+</div>
+
+</div></main>
+
+<script>
+const TRIGRAMS = [{"num": 1, "name": "乾", "sym": "☰", "ele": "天", "yao": [1, 1, 1]}, {"num": 2, "name": "兑", "sym": "☱", "ele": "泽", "yao": [1, 1, 0]}, {"num": 3, "name": "离", "sym": "☲", "ele": "火", "yao": [1, 0, 1]}, {"num": 4, "name": "震", "sym": "☳", "ele": "雷", "yao": [1, 0, 0]}, {"num": 5, "name": "巽", "sym": "☴", "ele": "风", "yao": [0, 1, 1]}, {"num": 6, "name": "坎", "sym": "☵", "ele": "水", "yao": [0, 1, 0]}, {"num": 7, "name": "艮", "sym": "☶", "ele": "山", "yao": [0, 0, 1]}, {"num": 8, "name": "坤", "sym": "☷", "ele": "地", "yao": [0, 0, 0]}];
+const HEX_TABLE = [{"name": "乾为天", "upper": 1, "lower": 1, "upper_name": "乾", "lower_name": "乾", "upper_sym": "☰", "lower_sym": "☰", "yao6": [1, 1, 1, 1, 1, 1], "zhi": {"1": "天风姤", "2": "天火同人", "3": "天泽履", "4": "风天小畜", "5": "火天大有", "6": "泽天夬"}, "hu": "乾为天", "zong": "乾为天", "cuo": "坤为地"}, {"name": "坤为地", "upper": 8, "lower": 8, "upper_name": "坤", "lower_name": "坤", "upper_sym": "☷", "lower_sym": "☷", "yao6": [0, 0, 0, 0, 0, 0], "zhi": {"1": "地雷复", "2": "地水师", "3": "地山谦", "4": "雷地豫", "5": "水地比", "6": "山地剥"}, "hu": "坤为地", "zong": "坤为地", "cuo": "乾为天"}, {"name": "水雷屯", "upper": 6, "lower": 4, "upper_name": "坎", "lower_name": "震", "upper_sym": "☵", "lower_sym": "☳", "yao6": [1, 0, 0, 0, 1, 0], "zhi": {"1": "水地比", "2": "水泽节", "3": "水火既济", "4": "泽雷随", "5": "地雷复", "6": "风雷益"}, "hu": "山地剥", "zong": "山水蒙", "cuo": "火风鼎"}, {"name": "山水蒙", "upper": 7, "lower": 6, "upper_name": "艮", "lower_name": "坎", "upper_sym": "☶", "lower_sym": "☵", "yao6": [0, 1, 0, 0, 0, 1], "zhi": {"1": "山泽损", "2": "山地剥", "3": "山风蛊", "4": "火水未济", "5": "风水涣", "6": "地水师"}, "hu": "地雷复", "zong": "水雷屯", "cuo": "泽火革"}, {"name": "水天需", "upper": 6, "lower": 1, "upper_name": "坎", "lower_name": "乾", "upper_sym": "☵", "lower_sym": "☰", "yao6": [1, 1, 1, 0, 1, 0], "zhi": {"1": "水风井", "2": "水火既济", "3": "水泽节", "4": "泽天夬", "5": "地天泰", "6": "风天小畜"}, "hu": "火泽睽", "zong": "天水讼", "cuo": "火地晋"}, {"name": "天水讼", "upper": 1, "lower": 6, "upper_name": "乾", "lower_name": "坎", "upper_sym": "☰", "lower_sym": "☵", "yao6": [0, 1, 0, 1, 1, 1], "zhi": {"1": "天泽履", "2": "天地否", "3": "天风姤", "4": "风水涣", "5": "火水未济", "6": "泽水困"}, "hu": "风火家人", "zong": "水天需", "cuo": "地火明夷"}, {"name": "地水师", "upper": 8, "lower": 6, "upper_name": "坤", "lower_name": "坎", "upper_sym": "☷", "lower_sym": "☵", "yao6": [0, 1, 0, 0, 0, 0], "zhi": {"1": "地泽临", "2": "坤为地", "3": "地风升", "4": "雷水解", "5": "坎为水", "6": "山水蒙"}, "hu": "地雷复", "zong": "水地比", "cuo": "天火同人"}, {"name": "水地比", "upper": 6, "lower": 8, "upper_name": "坎", "lower_name": "坤", "upper_sym": "☵", "lower_sym": "☷", "yao6": [0, 0, 0, 0, 1, 0], "zhi": {"1": "水雷屯", "2": "坎为水", "3": "水山蹇", "4": "泽地萃", "5": "坤为地", "6": "风地观"}, "hu": "山地剥", "zong": "地水师", "cuo": "火天大有"}, {"name": "风天小畜", "upper": 5, "lower": 1, "upper_name": "巽", "lower_name": "乾", "upper_sym": "☴", "lower_sym": "☰", "yao6": [1, 1, 1, 0, 1, 1], "zhi": {"1": "巽为风", "2": "风火家人", "3": "风泽中孚", "4": "乾为天", "5": "山天大畜", "6": "水天需"}, "hu": "火泽睽", "zong": "天泽履", "cuo": "雷地豫"}, {"name": "天泽履", "upper": 1, "lower": 2, "upper_name": "乾", "lower_name": "兑", "upper_sym": "☰", "lower_sym": "☱", "yao6": [1, 1, 0, 1, 1, 1], "zhi": {"1": "天水讼", "2": "天雷无妄", "3": "乾为天", "4": "风泽中孚", "5": "火泽睽", "6": "兑为泽"}, "hu": "风火家人", "zong": "风天小畜", "cuo": "地山谦"}, {"name": "地天泰", "upper": 8, "lower": 1, "upper_name": "坤", "lower_name": "乾", "upper_sym": "☷", "lower_sym": "☰", "yao6": [1, 1, 1, 0, 0, 0], "zhi": {"1": "地风升", "2": "地火明夷", "3": "地泽临", "4": "雷天大壮", "5": "水天需", "6": "山天大畜"}, "hu": "雷泽归妹", "zong": "天地否", "cuo": "天地否"}, {"name": "天地否", "upper": 1, "lower": 8, "upper_name": "乾", "lower_name": "坤", "upper_sym": "☰", "lower_sym": "☷", "yao6": [0, 0, 0, 1, 1, 1], "zhi": {"1": "天雷无妄", "2": "天水讼", "3": "天山遁", "4": "风地观", "5": "火地晋", "6": "泽地萃"}, "hu": "风山渐", "zong": "地天泰", "cuo": "地天泰"}, {"name": "天火同人", "upper": 1, "lower": 3, "upper_name": "乾", "lower_name": "离", "upper_sym": "☰", "lower_sym": "☲", "yao6": [1, 0, 1, 1, 1, 1], "zhi": {"1": "天山遁", "2": "乾为天", "3": "天雷无妄", "4": "风火家人", "5": "离为火", "6": "泽火革"}, "hu": "天风姤", "zong": "火天大有", "cuo": "地水师"}, {"name": "火天大有", "upper": 3, "lower": 1, "upper_name": "离", "lower_name": "乾", "upper_sym": "☲", "lower_sym": "☰", "yao6": [1, 1, 1, 1, 0, 1], "zhi": {"1": "火风鼎", "2": "离为火", "3": "火泽睽", "4": "山天大畜", "5": "乾为天", "6": "雷天大壮"}, "hu": "泽天夬", "zong": "天火同人", "cuo": "水地比"}, {"name": "地山谦", "upper": 8, "lower": 7, "upper_name": "坤", "lower_name": "艮", "upper_sym": "☷", "lower_sym": "☶", "yao6": [0, 0, 1, 0, 0, 0], "zhi": {"1": "地火明夷", "2": "地风升", "3": "坤为地", "4": "雷山小过", "5": "水山蹇", "6": "艮为山"}, "hu": "雷水解", "zong": "雷地豫", "cuo": "天泽履"}, {"name": "雷地豫", "upper": 4, "lower": 8, "upper_name": "震", "lower_name": "坤", "upper_sym": "☳", "lower_sym": "☷", "yao6": [0, 0, 0, 1, 0, 0], "zhi": {"1": "震为雷", "2": "雷水解", "3": "雷山小过", "4": "坤为地", "5": "泽地萃", "6": "火地晋"}, "hu": "水山蹇", "zong": "地山谦", "cuo": "风天小畜"}, {"name": "泽雷随", "upper": 2, "lower": 4, "upper_name": "兑", "lower_name": "震", "upper_sym": "☱", "lower_sym": "☳", "yao6": [1, 0, 0, 1, 1, 0], "zhi": {"1": "泽地萃", "2": "兑为泽", "3": "泽火革", "4": "水雷屯", "5": "震为雷", "6": "天雷无妄"}, "hu": "风山渐", "zong": "山风蛊", "cuo": "山风蛊"}, {"name": "山风蛊", "upper": 7, "lower": 5, "upper_name": "艮", "lower_name": "巽", "upper_sym": "☶", "lower_sym": "☴", "yao6": [0, 1, 1, 0, 0, 1], "zhi": {"1": "山天大畜", "2": "艮为山", "3": "山水蒙", "4": "火风鼎", "5": "巽为风", "6": "地风升"}, "hu": "雷泽归妹", "zong": "泽雷随", "cuo": "泽雷随"}, {"name": "地泽临", "upper": 8, "lower": 2, "upper_name": "坤", "lower_name": "兑", "upper_sym": "☷", "lower_sym": "☱", "yao6": [1, 1, 0, 0, 0, 0], "zhi": {"1": "地水师", "2": "地雷复", "3": "地天泰", "4": "雷泽归妹", "5": "水泽节", "6": "山泽损"}, "hu": "地雷复", "zong": "风地观", "cuo": "天山遁"}, {"name": "风地观", "upper": 5, "lower": 8, "upper_name": "巽", "lower_name": "坤", "upper_sym": "☴", "lower_sym": "☷", "yao6": [0, 0, 0, 0, 1, 1], "zhi": {"1": "风雷益", "2": "风水涣", "3": "风山渐", "4": "天地否", "5": "山地剥", "6": "水地比"}, "hu": "山地剥", "zong": "地泽临", "cuo": "雷天大壮"}, {"name": "火雷噬嗑", "upper": 3, "lower": 4, "upper_name": "离", "lower_name": "震", "upper_sym": "☲", "lower_sym": "☳", "yao6": [1, 0, 0, 1, 0, 1], "zhi": {"1": "火地晋", "2": "火泽睽", "3": "离为火", "4": "山雷颐", "5": "天雷无妄", "6": "震为雷"}, "hu": "水山蹇", "zong": "山火贲", "cuo": "水风井"}, {"name": "山火贲", "upper": 7, "lower": 3, "upper_name": "艮", "lower_name": "离", "upper_sym": "☶", "lower_sym": "☲", "yao6": [1, 0, 1, 0, 0, 1], "zhi": {"1": "艮为山", "2": "山天大畜", "3": "山雷颐", "4": "离为火", "5": "风火家人", "6": "地火明夷"}, "hu": "雷水解", "zong": "火雷噬嗑", "cuo": "泽水困"}, {"name": "山地剥", "upper": 7, "lower": 8, "upper_name": "艮", "lower_name": "坤", "upper_sym": "☶", "lower_sym": "☷", "yao6": [0, 0, 0, 0, 0, 1], "zhi": {"1": "山雷颐", "2": "山水蒙", "3": "艮为山", "4": "火地晋", "5": "风地观", "6": "坤为地"}, "hu": "坤为地", "zong": "地雷复", "cuo": "泽天夬"}, {"name": "地雷复", "upper": 8, "lower": 4, "upper_name": "坤", "lower_name": "震", "upper_sym": "☷", "lower_sym": "☳", "yao6": [1, 0, 0, 0, 0, 0], "zhi": {"1": "坤为地", "2": "地泽临", "3": "地火明夷", "4": "震为雷", "5": "水雷屯", "6": "山雷颐"}, "hu": "坤为地", "zong": "山地剥", "cuo": "天风姤"}, {"name": "天雷无妄", "upper": 1, "lower": 4, "upper_name": "乾", "lower_name": "震", "upper_sym": "☰", "lower_sym": "☳", "yao6": [1, 0, 0, 1, 1, 1], "zhi": {"1": "天地否", "2": "天泽履", "3": "天火同人", "4": "风雷益", "5": "火雷噬嗑", "6": "泽雷随"}, "hu": "风山渐", "zong": "山天大畜", "cuo": "地风升"}, {"name": "山天大畜", "upper": 7, "lower": 1, "upper_name": "艮", "lower_name": "乾", "upper_sym": "☶", "lower_sym": "☰", "yao6": [1, 1, 1, 0, 0, 1], "zhi": {"1": "山风蛊", "2": "山火贲", "3": "山泽损", "4": "火天大有", "5": "风天小畜", "6": "地天泰"}, "hu": "雷泽归妹", "zong": "天雷无妄", "cuo": "泽地萃"}, {"name": "山雷颐", "upper": 7, "lower": 4, "upper_name": "艮", "lower_name": "震", "upper_sym": "☶", "lower_sym": "☳", "yao6": [1, 0, 0, 0, 0, 1], "zhi": {"1": "山地剥", "2": "山泽损", "3": "山火贲", "4": "火雷噬嗑", "5": "风雷益", "6": "地雷复"}, "hu": "坤为地", "zong": "山雷颐", "cuo": "泽风大过"}, {"name": "泽风大过", "upper": 2, "lower": 5, "upper_name": "兑", "lower_name": "巽", "upper_sym": "☱", "lower_sym": "☴", "yao6": [0, 1, 1, 1, 1, 0], "zhi": {"1": "泽天夬", "2": "泽山咸", "3": "泽水困", "4": "水风井", "5": "雷风恒", "6": "天风姤"}, "hu": "乾为天", "zong": "泽风大过", "cuo": "山雷颐"}, {"name": "坎为水", "upper": 6, "lower": 6, "upper_name": "坎", "lower_name": "坎", "upper_sym": "☵", "lower_sym": "☵", "yao6": [0, 1, 0, 0, 1, 0], "zhi": {"1": "水泽节", "2": "水地比", "3": "水风井", "4": "泽水困", "5": "地水师", "6": "风水涣"}, "hu": "山雷颐", "zong": "坎为水", "cuo": "离为火"}, {"name": "离为火", "upper": 3, "lower": 3, "upper_name": "离", "lower_name": "离", "upper_sym": "☲", "lower_sym": "☲", "yao6": [1, 0, 1, 1, 0, 1], "zhi": {"1": "火山旅", "2": "火天大有", "3": "火雷噬嗑", "4": "山火贲", "5": "天火同人", "6": "雷火丰"}, "hu": "泽风大过", "zong": "离为火", "cuo": "坎为水"}, {"name": "泽山咸", "upper": 2, "lower": 7, "upper_name": "兑", "lower_name": "艮", "upper_sym": "☱", "lower_sym": "☶", "yao6": [0, 0, 1, 1, 1, 0], "zhi": {"1": "泽火革", "2": "泽风大过", "3": "泽地萃", "4": "水山蹇", "5": "雷山小过", "6": "天山遁"}, "hu": "天风姤", "zong": "雷风恒", "cuo": "山泽损"}, {"name": "雷风恒", "upper": 4, "lower": 5, "upper_name": "震", "lower_name": "巽", "upper_sym": "☳", "lower_sym": "☴", "yao6": [0, 1, 1, 1, 0, 0], "zhi": {"1": "雷天大壮", "2": "雷山小过", "3": "雷水解", "4": "地风升", "5": "泽风大过", "6": "火风鼎"}, "hu": "泽天夬", "zong": "泽山咸", "cuo": "风雷益"}, {"name": "天山遁", "upper": 1, "lower": 7, "upper_name": "乾", "lower_name": "艮", "upper_sym": "☰", "lower_sym": "☶", "yao6": [0, 0, 1, 1, 1, 1], "zhi": {"1": "天火同人", "2": "天风姤", "3": "天地否", "4": "风山渐", "5": "火山旅", "6": "泽山咸"}, "hu": "天风姤", "zong": "雷天大壮", "cuo": "地泽临"}, {"name": "雷天大壮", "upper": 4, "lower": 1, "upper_name": "震", "lower_name": "乾", "upper_sym": "☳", "lower_sym": "☰", "yao6": [1, 1, 1, 1, 0, 0], "zhi": {"1": "雷风恒", "2": "雷火丰", "3": "雷泽归妹", "4": "地天泰", "5": "泽天夬", "6": "火天大有"}, "hu": "泽天夬", "zong": "天山遁", "cuo": "风地观"}, {"name": "火地晋", "upper": 3, "lower": 8, "upper_name": "离", "lower_name": "坤", "upper_sym": "☲", "lower_sym": "☷", "yao6": [0, 0, 0, 1, 0, 1], "zhi": {"1": "火雷噬嗑", "2": "火水未济", "3": "火山旅", "4": "山地剥", "5": "天地否", "6": "雷地豫"}, "hu": "水山蹇", "zong": "地火明夷", "cuo": "水天需"}, {"name": "地火明夷", "upper": 8, "lower": 3, "upper_name": "坤", "lower_name": "离", "upper_sym": "☷", "lower_sym": "☲", "yao6": [1, 0, 1, 0, 0, 0], "zhi": {"1": "地山谦", "2": "地天泰", "3": "地雷复", "4": "雷火丰", "5": "水火既济", "6": "山火贲"}, "hu": "雷水解", "zong": "火地晋", "cuo": "天水讼"}, {"name": "风火家人", "upper": 5, "lower": 3, "upper_name": "巽", "lower_name": "离", "upper_sym": "☴", "lower_sym": "☲", "yao6": [1, 0, 1, 0, 1, 1], "zhi": {"1": "风山渐", "2": "风天小畜", "3": "风雷益", "4": "天火同人", "5": "山火贲", "6": "水火既济"}, "hu": "火水未济", "zong": "火泽睽", "cuo": "雷水解"}, {"name": "火泽睽", "upper": 3, "lower": 2, "upper_name": "离", "lower_name": "兑", "upper_sym": "☲", "lower_sym": "☱", "yao6": [1, 1, 0, 1, 0, 1], "zhi": {"1": "火水未济", "2": "火雷噬嗑", "3": "火天大有", "4": "山泽损", "5": "天泽履", "6": "雷泽归妹"}, "hu": "水火既济", "zong": "风火家人", "cuo": "水山蹇"}, {"name": "水山蹇", "upper": 6, "lower": 7, "upper_name": "坎", "lower_name": "艮", "upper_sym": "☵", "lower_sym": "☶", "yao6": [0, 0, 1, 0, 1, 0], "zhi": {"1": "水火既济", "2": "水风井", "3": "水地比", "4": "泽山咸", "5": "地山谦", "6": "风山渐"}, "hu": "火水未济", "zong": "雷水解", "cuo": "火泽睽"}, {"name": "雷水解", "upper": 4, "lower": 6, "upper_name": "震", "lower_name": "坎", "upper_sym": "☳", "lower_sym": "☵", "yao6": [0, 1, 0, 1, 0, 0], "zhi": {"1": "雷泽归妹", "2": "雷地豫", "3": "雷风恒", "4": "地水师", "5": "泽水困", "6": "火水未济"}, "hu": "水火既济", "zong": "水山蹇", "cuo": "风火家人"}, {"name": "山泽损", "upper": 7, "lower": 2, "upper_name": "艮", "lower_name": "兑", "upper_sym": "☶", "lower_sym": "☱", "yao6": [1, 1, 0, 0, 0, 1], "zhi": {"1": "山水蒙", "2": "山雷颐", "3": "山天大畜", "4": "火泽睽", "5": "风泽中孚", "6": "地泽临"}, "hu": "地雷复", "zong": "风雷益", "cuo": "泽山咸"}, {"name": "风雷益", "upper": 5, "lower": 4, "upper_name": "巽", "lower_name": "震", "upper_sym": "☴", "lower_sym": "☳", "yao6": [1, 0, 0, 0, 1, 1], "zhi": {"1": "风地观", "2": "风泽中孚", "3": "风火家人", "4": "天雷无妄", "5": "山雷颐", "6": "水雷屯"}, "hu": "山地剥", "zong": "山泽损", "cuo": "雷风恒"}, {"name": "泽天夬", "upper": 2, "lower": 1, "upper_name": "兑", "lower_name": "乾", "upper_sym": "☱", "lower_sym": "☰", "yao6": [1, 1, 1, 1, 1, 0], "zhi": {"1": "泽风大过", "2": "泽火革", "3": "兑为泽", "4": "水天需", "5": "雷天大壮", "6": "乾为天"}, "hu": "乾为天", "zong": "天风姤", "cuo": "山地剥"}, {"name": "天风姤", "upper": 1, "lower": 5, "upper_name": "乾", "lower_name": "巽", "upper_sym": "☰", "lower_sym": "☴", "yao6": [0, 1, 1, 1, 1, 1], "zhi": {"1": "乾为天", "2": "天山遁", "3": "天水讼", "4": "巽为风", "5": "火风鼎", "6": "泽风大过"}, "hu": "乾为天", "zong": "泽天夬", "cuo": "地雷复"}, {"name": "泽地萃", "upper": 2, "lower": 8, "upper_name": "兑", "lower_name": "坤", "upper_sym": "☱", "lower_sym": "☷", "yao6": [0, 0, 0, 1, 1, 0], "zhi": {"1": "泽雷随", "2": "泽水困", "3": "泽山咸", "4": "水地比", "5": "雷地豫", "6": "天地否"}, "hu": "风山渐", "zong": "地风升", "cuo": "山天大畜"}, {"name": "地风升", "upper": 8, "lower": 5, "upper_name": "坤", "lower_name": "巽", "upper_sym": "☷", "lower_sym": "☴", "yao6": [0, 1, 1, 0, 0, 0], "zhi": {"1": "地天泰", "2": "地山谦", "3": "地水师", "4": "雷风恒", "5": "水风井", "6": "山风蛊"}, "hu": "雷泽归妹", "zong": "泽地萃", "cuo": "天雷无妄"}, {"name": "泽水困", "upper": 2, "lower": 6, "upper_name": "兑", "lower_name": "坎", "upper_sym": "☱", "lower_sym": "☵", "yao6": [0, 1, 0, 1, 1, 0], "zhi": {"1": "兑为泽", "2": "泽地萃", "3": "泽风大过", "4": "坎为水", "5": "雷水解", "6": "天水讼"}, "hu": "风火家人", "zong": "水风井", "cuo": "山火贲"}, {"name": "水风井", "upper": 6, "lower": 5, "upper_name": "坎", "lower_name": "巽", "upper_sym": "☵", "lower_sym": "☴", "yao6": [0, 1, 1, 0, 1, 0], "zhi": {"1": "水天需", "2": "水山蹇", "3": "坎为水", "4": "泽风大过", "5": "地风升", "6": "巽为风"}, "hu": "火泽睽", "zong": "泽水困", "cuo": "火雷噬嗑"}, {"name": "泽火革", "upper": 2, "lower": 3, "upper_name": "兑", "lower_name": "离", "upper_sym": "☱", "lower_sym": "☲", "yao6": [1, 0, 1, 1, 1, 0], "zhi": {"1": "泽山咸", "2": "泽天夬", "3": "泽雷随", "4": "水火既济", "5": "雷火丰", "6": "天火同人"}, "hu": "天风姤", "zong": "火风鼎", "cuo": "山水蒙"}, {"name": "火风鼎", "upper": 3, "lower": 5, "upper_name": "离", "lower_name": "巽", "upper_sym": "☲", "lower_sym": "☴", "yao6": [0, 1, 1, 1, 0, 1], "zhi": {"1": "火天大有", "2": "火山旅", "3": "火水未济", "4": "山风蛊", "5": "天风姤", "6": "雷风恒"}, "hu": "泽天夬", "zong": "泽火革", "cuo": "水雷屯"}, {"name": "震为雷", "upper": 4, "lower": 4, "upper_name": "震", "lower_name": "震", "upper_sym": "☳", "lower_sym": "☳", "yao6": [1, 0, 0, 1, 0, 0], "zhi": {"1": "雷地豫", "2": "雷泽归妹", "3": "雷火丰", "4": "地雷复", "5": "泽雷随", "6": "火雷噬嗑"}, "hu": "水山蹇", "zong": "艮为山", "cuo": "巽为风"}, {"name": "艮为山", "upper": 7, "lower": 7, "upper_name": "艮", "lower_name": "艮", "upper_sym": "☶", "lower_sym": "☶", "yao6": [0, 0, 1, 0, 0, 1], "zhi": {"1": "山火贲", "2": "山风蛊", "3": "山地剥", "4": "火山旅", "5": "风山渐", "6": "地山谦"}, "hu": "雷水解", "zong": "震为雷", "cuo": "兑为泽"}, {"name": "风山渐", "upper": 5, "lower": 7, "upper_name": "巽", "lower_name": "艮", "upper_sym": "☴", "lower_sym": "☶", "yao6": [0, 0, 1, 0, 1, 1], "zhi": {"1": "风火家人", "2": "巽为风", "3": "风地观", "4": "天山遁", "5": "艮为山", "6": "水山蹇"}, "hu": "火水未济", "zong": "雷泽归妹", "cuo": "雷泽归妹"}, {"name": "雷泽归妹", "upper": 4, "lower": 2, "upper_name": "震", "lower_name": "兑", "upper_sym": "☳", "lower_sym": "☱", "yao6": [1, 1, 0, 1, 0, 0], "zhi": {"1": "雷水解", "2": "震为雷", "3": "雷天大壮", "4": "地泽临", "5": "兑为泽", "6": "火泽睽"}, "hu": "水火既济", "zong": "风山渐", "cuo": "风山渐"}, {"name": "雷火丰", "upper": 4, "lower": 3, "upper_name": "震", "lower_name": "离", "upper_sym": "☳", "lower_sym": "☲", "yao6": [1, 0, 1, 1, 0, 0], "zhi": {"1": "雷山小过", "2": "雷天大壮", "3": "震为雷", "4": "地火明夷", "5": "泽火革", "6": "离为火"}, "hu": "泽风大过", "zong": "火山旅", "cuo": "风水涣"}, {"name": "火山旅", "upper": 3, "lower": 7, "upper_name": "离", "lower_name": "艮", "upper_sym": "☲", "lower_sym": "☶", "yao6": [0, 0, 1, 1, 0, 1], "zhi": {"1": "离为火", "2": "火风鼎", "3": "火地晋", "4": "艮为山", "5": "天山遁", "6": "雷山小过"}, "hu": "泽风大过", "zong": "雷火丰", "cuo": "水泽节"}, {"name": "巽为风", "upper": 5, "lower": 5, "upper_name": "巽", "lower_name": "巽", "upper_sym": "☴", "lower_sym": "☴", "yao6": [0, 1, 1, 0, 1, 1], "zhi": {"1": "风天小畜", "2": "风山渐", "3": "风水涣", "4": "天风姤", "5": "山风蛊", "6": "水风井"}, "hu": "火泽睽", "zong": "兑为泽", "cuo": "震为雷"}, {"name": "兑为泽", "upper": 2, "lower": 2, "upper_name": "兑", "lower_name": "兑", "upper_sym": "☱", "lower_sym": "☱", "yao6": [1, 1, 0, 1, 1, 0], "zhi": {"1": "泽水困", "2": "泽雷随", "3": "泽天夬", "4": "水泽节", "5": "雷泽归妹", "6": "天泽履"}, "hu": "风火家人", "zong": "巽为风", "cuo": "艮为山"}, {"name": "风水涣", "upper": 5, "lower": 6, "upper_name": "巽", "lower_name": "坎", "upper_sym": "☴", "lower_sym": "☵", "yao6": [0, 1, 0, 0, 1, 1], "zhi": {"1": "风泽中孚", "2": "风地观", "3": "巽为风", "4": "天水讼", "5": "山水蒙", "6": "坎为水"}, "hu": "山雷颐", "zong": "水泽节", "cuo": "雷火丰"}, {"name": "水泽节", "upper": 6, "lower": 2, "upper_name": "坎", "lower_name": "兑", "upper_sym": "☵", "lower_sym": "☱", "yao6": [1, 1, 0, 0, 1, 0], "zhi": {"1": "坎为水", "2": "水雷屯", "3": "水天需", "4": "兑为泽", "5": "地泽临", "6": "风泽中孚"}, "hu": "山雷颐", "zong": "风水涣", "cuo": "火山旅"}, {"name": "风泽中孚", "upper": 5, "lower": 2, "upper_name": "巽", "lower_name": "兑", "upper_sym": "☴", "lower_sym": "☱", "yao6": [1, 1, 0, 0, 1, 1], "zhi": {"1": "风水涣", "2": "风雷益", "3": "风天小畜", "4": "天泽履", "5": "山泽损", "6": "水泽节"}, "hu": "山雷颐", "zong": "风泽中孚", "cuo": "雷山小过"}, {"name": "雷山小过", "upper": 4, "lower": 7, "upper_name": "震", "lower_name": "艮", "upper_sym": "☳", "lower_sym": "☶", "yao6": [0, 0, 1, 1, 0, 0], "zhi": {"1": "雷火丰", "2": "雷风恒", "3": "雷地豫", "4": "地山谦", "5": "泽山咸", "6": "火山旅"}, "hu": "泽风大过", "zong": "雷山小过", "cuo": "风泽中孚"}, {"name": "水火既济", "upper": 6, "lower": 3, "upper_name": "坎", "lower_name": "离", "upper_sym": "☵", "lower_sym": "☲", "yao6": [1, 0, 1, 0, 1, 0], "zhi": {"1": "水山蹇", "2": "水天需", "3": "水雷屯", "4": "泽火革", "5": "地火明夷", "6": "风火家人"}, "hu": "火水未济", "zong": "火水未济", "cuo": "火水未济"}, {"name": "火水未济", "upper": 3, "lower": 6, "upper_name": "离", "lower_name": "坎", "upper_sym": "☲", "lower_sym": "☵", "yao6": [0, 1, 0, 1, 0, 1], "zhi": {"1": "火泽睽", "2": "火地晋", "3": "火风鼎", "4": "山水蒙", "5": "天水讼", "6": "雷水解"}, "hu": "水火既济", "zong": "水火既济", "cuo": "水火既济"}];
+
+function getTriNum(n, mod) {
+  // mod=8 for gua, mod=6 for dong
+  if(n <= mod) return n === 0 ? mod : n;
+  const r = n % mod;
+  return r === 0 ? mod : r;
+}
+
+function validateInput(el, mod) {
+  const v = parseInt(el.value);
+  if(isNaN(v) || v <= 0) { el.classList.add('invalid'); return; }
+  const s = el.value.toString();
+  if(s.startsWith('0') && s.length > 1) { el.classList.add('invalid'); return; }
+  el.classList.remove('invalid');
+}
+
+function findHex(upNum, loNum) { return HEX_TABLE.find(h => h.upper===upNum && h.lower===loNum); }
+function findHexByName(name) { return HEX_TABLE.find(h => h.name===name); }
+
+function renderYao(yao6, dong) {
+  let html = '<div class="yao-wrap">';
+  for(let i=5;i>=0;i--) {
+    const bit = yao6[i], isM = dong && (i+1)===dong;
+    html += '<div class="yao-row'+(isM?' moving':'')+'"><span class="yao-num">'+(i+1)+'</span>';
+    if(bit===1) html += '<div class="bar yang-bar"></div>';
+    else html += '<div class="bar yin-l"></div><div class="bar yin-r"></div>';
+    html += '</div>';
+  }
+  return html + '</div>';
+}
+
+function renderHCard(label, hex, yao6, dong, isMain) {
+  if(!hex) return '<div class="hcard"><div class="hlabel">'+label+'</div><div style="color:var(--color-text-faint)">同本卦</div></div>';
+  return '<div class="hcard'+(isMain?' main':'')+'">'+
+    '<div class="hlabel">'+label+'</div>'+
+    renderYao(yao6, dong)+
+    '<div class="hname">'+hex.name+'</div>'+
+    '<div class="htri">'+hex.upper_sym+hex.upper_name+'（上）/ '+hex.lower_sym+hex.lower_name+'（下）</div>'+
+    '</div>';
+}
+
+function calc() {
+  const n1r = document.getElementById('n1').value.trim();
+  const n2r = document.getElementById('n2').value.trim();
+  const n3r = document.getElementById('n3').value.trim();
+  const notice = document.getElementById('noticeMsg');
+
+  // 校验：不能空，不能以0开头（两位以上）
+  const inputs = [{v:n1r,id:'n1'},{v:n2r,id:'n2'},{v:n3r,id:'n3'}];
+  let hasErr = false;
+  inputs.forEach(({v,id})=>{
+    const el = document.getElementById(id);
+    if(!v || isNaN(parseInt(v)) || parseInt(v)<=0 || (v.startsWith('0')&&v.length>1)) {
+      el.classList.add('invalid'); hasErr=true;
+    } else el.classList.remove('invalid');
+  });
+  if(hasErr) {
+    notice.style.display='block';
+    notice.textContent='⚠ 请输入正整数，且不能以0开头（如"012"无效）';
+    return;
+  }
+  notice.style.display='none';
+
+  const n1=parseInt(n1r), n2=parseInt(n2r), n3=parseInt(n3r);
+
+  const loNum = getTriNum(n1, 8);
+  const upNum = getTriNum(n2, 8);
+  const dong  = getTriNum(n3, 6);
+
+  const loTri = TRIGRAMS.find(t=>t.num===loNum);
+  const upTri = TRIGRAMS.find(t=>t.num===upNum);
+  const benHex = findHex(upNum, loNum);
+  if(!benHex) return;
+
+  function descNum(n, mod, label) {
+    if(n <= mod) return n+'（≤'+mod+'直接取'+n+'）→ '+label+'数 <strong>'+n+'</strong>';
+    const r = n%mod; const res = r===0?mod:r;
+    return n+'÷'+mod+'余'+r+(r===0?'→余0取'+mod:'')+'→ '+label+'数 <strong>'+res+'</strong>';
+  }
+  function yaoTag(y) {
+    return y===1?'<span class="tag tag-yang">阳</span>':'<span class="tag tag-yin">阴</span>';
+  }
+
+  document.getElementById('calcBox').innerHTML =
+    '<div>第一组 <strong>'+n1+'</strong>：'+descNum(n1,8,'先天')+
+      ' → 下卦 <span class="tag tag-def">'+loTri.sym+loTri.name+'</span>'+
+      '　爻（初→上）：'+loTri.yao.map(yaoTag).join(' ')+'</div>'+
+    '<div>第二组 <strong>'+n2+'</strong>：'+descNum(n2,8,'先天')+
+      ' → 上卦 <span class="tag tag-def">'+upTri.sym+upTri.name+'</span>'+
+      '　爻（初→上）：'+upTri.yao.map(yaoTag).join(' ')+'</div>'+
+    '<div>第三组 <strong>'+n3+'</strong>：'+descNum(n3,6,'动爻')+
+      ' → 第 <span class="tag tag-dong">'+dong+'</span> 爻动</div>'+
+    '<div style="margin-top:0.5rem;padding-top:0.5rem;border-top:1px solid var(--color-border)">'+
+      '本卦六爻（初→上）：<span class="mono">'+benHex.yao6.join('')+'</span>'+
+      '　所有衍卦均由静态查表得出，零手算</div>';
+
+  const zhiHex = findHexByName(benHex.zhi[dong]);
+  const huHex  = findHexByName(benHex.hu);
+  const zongHex= findHexByName(benHex.zong);
+  const cuoHex = findHexByName(benHex.cuo);
+
+  // 上排：本卦 + 之卦；下排：互卦 + 综卦 + 错卦
+  document.getElementById('hexGrid').innerHTML =
+    '<div class="row-label">▍ 本卦 · 之卦</div>'+
+    '<div class="hex-row-main">'+
+      renderHCard('本卦', benHex, benHex.yao6, dong, true)+
+      renderHCard('之卦（第'+dong+'爻变）', zhiHex, zhiHex?zhiHex.yao6:benHex.yao6, null, false)+
+    '</div>'+
+    '<div class="row-label">▍ 互卦 · 综卦 · 错卦</div>'+
+    '<div class="hex-row-sub">'+
+      renderHCard('互卦', huHex, huHex?huHex.yao6:[], null, false)+
+      renderHCard('综卦', zongHex, zongHex?zongHex.yao6:[], null, false)+
+      renderHCard('错卦', cuoHex, cuoHex?cuoHex.yao6:[], null, false)+
+    '</div>';
+
+  // 汇总摘要
+  function hexDesc(hex) {
+    if(!hex) return '同本卦';
+    return hex.name+'（上'+hex.upper_name+' 下'+hex.lower_name+'）';
+  }
+  const yaosDetail = analyzeYaos(benHex.yao6, dong);
+  const posNames2 = ['初','二','三','四','五','六'];
+  const summary =
+    '【本卦】' + hexDesc(benHex) + '　动爻：第'+dong+'爻（'+(['','初','二','三','四','五','六'][dong]+'爻')+')' +
+    '\n【之卦】' + hexDesc(zhiHex) +
+    '\n【互卦】' + hexDesc(huHex) +
+    '\n【综卦】' + hexDesc(zongHex) +
+    '\n【错卦】' + hexDesc(cuoHex) +
+    '\n' +
+    '\n六爻分析（上→初）：' +
+    yaosDetail.slice().reverse().map(y=>{
+      const pn = posNames2[y.pos-1]+'爻';
+      return pn+'['+(y.isYang?'阳':'阴')+'] 位:'+( y.dangWei?'当':'失')+'位 德:'+y.de+' 应:'+( y.hasYing?'有应':'不应')+( y.isDong?' ★动':'');
+    }).join('\n　　　　　') +
+    '\n\n输入数字：'+n1+'，'+n2+'，'+n3;
+  document.getElementById('summaryText').textContent = summary;
+
+  // 渲染六爻详解
+  renderYaoDetail(benHex.yao6, dong, benHex, zhiHex||benHex, huHex||benHex, zongHex||benHex, cuoHex||benHex, n1, n2, n3);
+
+  document.getElementById('result').style.display='block';
+  document.getElementById('result').scrollIntoView({behavior:'smooth',block:'nearest'});
+
+  document.querySelectorAll('.ftable tr[data-name]').forEach(r=>r.classList.remove('highlight'));
+  const rows = document.querySelectorAll('.ftable tr[data-name="'+benHex.name+'"]');
+  rows.forEach(r=>r.classList.add('highlight'));
+}
+
+function randCalc() {
+  // 生成随机三位数（100-999）
+  document.getElementById('n1').value = Math.floor(Math.random()*900)+100;
+  document.getElementById('n2').value = Math.floor(Math.random()*900)+100;
+  document.getElementById('n3').value = Math.floor(Math.random()*900)+100;
+  ['n1','n2','n3'].forEach(id=>document.getElementById(id).classList.remove('invalid'));
+  calc();
+}
+
+function clearAll() {
+  ['n1','n2','n3'].forEach(id=>{document.getElementById(id).value='';document.getElementById(id).classList.remove('invalid');});
+  document.getElementById('result').style.display='none';
+  document.getElementById('noticeMsg').style.display='none';
+  document.querySelectorAll('.ftable tr[data-name]').forEach(r=>r.classList.remove('highlight'));
+}
+
+// 渲染八卦表
+document.getElementById('triTable').innerHTML =
+  '<thead><tr><th>先天数</th><th>卦名</th><th>符号</th><th>元素</th><th>五行</th><th>爻性（初→上）</th></tr></thead><tbody>'+
+  TRIGRAMS.map(t=>{
+    const wuxing = {'乾':'金','兑':'金','离':'火','震':'木','巽':'木','坎':'水','艮':'土','坤':'土'}[t.name]||'';
+    return '<tr><td><strong>'+t.num+'</strong></td><td><strong>'+t.name+'</strong></td>'+
+      '<td style="font-size:1.4em">'+t.sym+'</td><td>'+t.ele+'</td><td>'+wuxing+'</td>'+
+      '<td>'+t.yao.map(y=>y?'<span class="tag tag-yang">阳 1</span>':'<span class="tag tag-yin">阴 0</span>').join(' ')+'</td></tr>';
+  }).join('')+'</tbody>';
+
+// 渲染64卦全表
+document.getElementById('fullTable').innerHTML =
+  '<thead><tr><th>#</th><th>卦名</th><th>上卦</th><th>下卦</th><th>六爻(初→上)</th><th>互卦</th><th>综卦</th><th>错卦</th><th>初爻动</th><th>二爻动</th><th>三爻动</th><th>四爻动</th><th>五爻动</th><th>六爻动</th></tr></thead><tbody>'+
+  HEX_TABLE.map((h,i)=>'<tr data-name="'+h.name+'">'+
+    '<td style="color:var(--color-text-faint)">'+(i+1)+'</td>'+
+    '<td><strong>'+h.name+'</strong></td>'+
+    '<td>'+h.upper_sym+h.upper_name+'</td>'+
+    '<td>'+h.lower_sym+h.lower_name+'</td>'+
+    '<td class="mono">'+h.yao6.join('')+'</td>'+
+    '<td>'+h.hu+'</td><td>'+h.zong+'</td><td>'+h.cuo+'</td>'+
+    '<td>'+h.zhi[1]+'</td><td>'+h.zhi[2]+'</td><td>'+h.zhi[3]+'</td>'+
+    '<td>'+h.zhi[4]+'</td><td>'+h.zhi[5]+'</td><td>'+h.zhi[6]+'</td>'+
+  '</tr>').join('')+'</tbody>';
+
+
+// =================== 六爻详解分析 ===================
+function analyzeYaos(yao6, dong) {
+  const yangPos = new Set([1,3,5]);
+  const posNames = ['初','二','三','四','五','六'];
+  const results = [];
+  const yingMap = {1:4,2:5,3:6,4:1,5:2,6:3};
+
+  for(let i=0;i<6;i++){
+    const pos = i+1;
+    const yao = yao6[i];
+    const isYang = yao===1;
+
+    // 位
+    const isYangPos = yangPos.has(pos);
+    const dangWei = (isYang && isYangPos) || (!isYang && !isYangPos);
+
+    // 德
+    const isZhong = pos===2||pos===5;
+    const isZheng = dangWei;
+    let de = '—';
+    if(isZhong && isZheng) de='中正';
+    else if(isZhong) de='中';
+    else if(isZheng) de='正';
+
+    // 应
+    const yingPos = yingMap[pos];
+    const yingYao = yao6[yingPos-1];
+    const hasYing = yao !== yingYao;
+    const yingStr = hasYing ? '应（↔'+posNames[yingPos-1]+'爻）' : '不应';
+
+    // 比
+    const biParts = [];
+    if(i>0){
+      const lower = yao6[i-1];
+      if(isYang && lower===0) biParts.push('据下');
+      else if(!isYang && lower===1) biParts.push('⚠乘下');
+      else biParts.push('比下');
+    }
+    if(i<5){
+      const upper = yao6[i+1];
+      if(!isYang && upper===1) biParts.push('承上');
+      else if(isYang && upper===0) biParts.push('据上');
+      else if(isYang && upper===1) biParts.push('比上');
+      else biParts.push('⚠乘上');
+    }
+
+    results.push({pos,yao,isYang,dangWei,de,hasYing,yingStr,bi:biParts.join('，'),isDong:(pos===dong)});
+  }
+  return results;
+}
+
+function renderYaoDetail(yao6, dong, benHex, zhiHex, huHex, zongHex, cuoHex, n1, n2, n3) {
+  const posNames = ['初','二','三','四','五','六'];
+  const yaos = analyzeYaos(yao6, dong);
+
+  // 卦时 = 当位、中正爻的特征
+  const zhongzhengCount = yaos.filter(y=>y.de==='中正').length;
+  const dangweiCount = yaos.filter(y=>y.dangWei).length;
+  const yingCount = yaos.filter(y=>y.hasYing).length/2; // 相应对数
+
+  // 卦德判断
+  let guaDe = '平卦';
+  if(zhongzhengCount>=2) guaDe='刚柔中正';
+  else if(zhongzhengCount===1) guaDe='有中正之德';
+  else if(dangweiCount>=4) guaDe='多当位';
+  else if(dangweiCount<=2) guaDe='多失位';
+
+  // 卦时（从卦名/卦象推断）
+  const guaShiMap = {
+    '乾为天':'天行健，刚健自强时',
+    '坤为地':'地势坤，厚德载物时',
+    '水雷屯':'万物草创，艰难起步时',
+    '山水蒙':'蒙昧初开，需师教化时',
+    '水天需':'等待时机，养精蓄锐时',
+    '天水讼':'争讼多舛，慎防纷争时',
+    '地水师':'统众御敌，令行禁止时',
+    '水地比':'亲附团结，择主而从时',
+    '风天小畜':'积小成大，蓄养等进时',
+    '天泽履':'踩虎尾而不噬，谨慎践行时',
+    '地天泰':'天地交泰，万物通达时',
+    '天地否':'天地不交，闭塞不通时',
+    '天火同人':'同心协力，开诚布公时',
+    '火天大有':'大有所获，顺天依时',
+    '地山谦':'谦虚处下，功成而弗居时',
+    '雷地豫':'和乐顺畅，豫备有余时',
+    '泽雷随':'顺时而动，随机应变时',
+    '山风蛊':'事有蛊弊，整饬振作时',
+    '地泽临':'居上临下，临众御世时',
+    '风地观':'观瞻示范，化民成俗时',
+    '火雷噬嗑':'刚决果断，噬断障碍时',
+    '山火贲':'文质彬彬，修饰完善时',
+    '山地剥':'剥落殆尽，小人盛行时',
+    '地雷复':'一阳来复，休养生息时',
+    '天雷无妄':'无私无妄，顺天行正时',
+    '山天大畜':'大力蓄积，待时而发时',
+    '山雷颐':'颐养正道，慎言节食时',
+    '泽风大过':'大事越常，时势险重时',
+    '坎为水':'险中求通，习坎砺行时',
+    '离为火':'文明光明，依附得正时',
+    '泽山咸':'感而遂通，男女相感时',
+    '雷风恒':'恒久不变，持守正道时',
+    '天山遁':'退隐避世，以守待时时',
+    '雷天大壮':'阳刚壮盛，慎勿妄动时',
+    '火地晋':'日出明盛，晋升发展时',
+    '地火明夷':'光明入地，韬光养晦时',
+    '风火家人':'家道和睦，正家有方时',
+    '火泽睽':'乖离相违，求同存异时',
+    '水山蹇':'跛行艰难，反身修德时',
+    '雷水解':'解除险难，宽赦有益时',
+    '山泽损':'减损在下，益上损己时',
+    '风雷益':'增益在下，上益于下时',
+    '泽天夬':'决断果行，扬正去邪时',
+    '天风姤':'阴柔初遇，防微杜渐时',
+    '泽地萃':'聚集汇聚，利见大人时',
+    '地风升':'积累上升，顺势而升时',
+    '泽水困':'困境穷极，守正待时时',
+    '水风井':'养人不穷，汲引有恒时',
+    '泽火革':'革故鼎新，顺天应人时',
+    '火风鼎':'取新致用，烹饪鼎新时',
+    '震为雷':'雷震惊动，反省修身时',
+    '艮为山':'艮止不动，静以守正时',
+    '风山渐':'循序渐进，渐进有序时',
+    '雷泽归妹':'归妹从嫁，终而有始时',
+    '雷火丰':'丰盛富足，日中则昃时',
+    '火山旅':'旅途在外，谨慎处世时',
+    '巽为风':'顺而入，重申命令时',
+    '兑为泽':'喜悦兑现，说以先民时',
+    '风水涣':'涣散离析，聚散有时时',
+    '水泽节':'节制有度，甘节中道时',
+    '风泽中孚':'诚信感通，化及豚鱼时',
+    '雷山小过':'小有过越，行须审慎时',
+    '水火既济':'既成已济，防患守成时',
+    '火水未济':'未竟待成，谨终慎始时'
+  };
+  const guaShi = guaShiMap[benHex.name] || '处变应时';
+
+  // 渲染卦级总览
+  const dongYao = yaos[dong-1];
+  document.getElementById('guaSummaryGrid').innerHTML = 
+    '<div class="gua-item"><div class="gua-item-label">🕐 时</div><div class="gua-item-val">'+guaShi+'</div><div class="gua-item-desc">本卦场域能量与时势特征</div></div>'+
+    '<div class="gua-item"><div class="gua-item-label">⚖️ 卦德</div><div class="gua-item-val">'+guaDe+'</div><div class="gua-item-desc">中正爻'+zhongzhengCount+'个，当位爻'+dangweiCount+'个，相应对数'+Math.round(yingCount)+'</div></div>'+
+    '<div class="gua-item"><div class="gua-item-label">🎯 动爻焦点</div><div class="gua-item-val">'+(posNames[dong-1])+'爻（'+(['阳','阴'][1-dongYao.yao]+'→'+['阳','阴'][dongYao.yao])+'）</div><div class="gua-item-desc">动爻：位='+dongYao.dangWei+'（'+( dongYao.dangWei?'当位':'不当位')+'）· 德='+dongYao.de+'</div></div>'+
+    '<div class="gua-item"><div class="gua-item-label">🔄 错综关系</div><div class="gua-item-val">错'+cuoHex.name+' · 综'+zongHex.name+'</div><div class="gua-item-desc">互'+huHex.name+'（中层过程）· 之'+zhiHex.name+'（变后归宿）</div></div>';
+
+  // 渲染六爻详解表
+  let rows = '<thead><tr><th>爻位</th><th>阴阳</th><th>位</th><th>德</th><th>应</th><th>比（承乘比据）</th></tr></thead><tbody>';
+
+  // 从上到下显示（六→初）
+  for(let i=5;i>=0;i--){
+    const y = yaos[i];
+    const pname = posNames[i]+'爻';
+    const guaLabel = i>=3 ? '上卦·'+(i===5?'上':i===4?'五':'四')+'爻' : '下卦·'+(i===2?'三':i===1?'二':'初')+'爻';
+
+    const weiTag = y.dangWei ? '<span class="tag-ok">当位</span>' : '<span class="tag-no">不当位</span>';
+    let deTag;
+    if(y.de==='中正') deTag='<span class="tag-zhongzheng">中正</span>';
+    else if(y.de==='中') deTag='<span class="tag-ok">中</span>';
+    else if(y.de==='正') deTag='<span class="tag-ok">正</span>';
+    else deTag='<span class="tag-no">—</span>';
+
+    const yingTag = y.hasYing ? '<span class="tag-ok">'+y.yingStr+'</span>' : '<span class="tag-no">不应</span>';
+
+    const biHtml = y.bi.split('，').map(b => {
+      if(b.startsWith('⚠')) return '<span class="tag-warn">'+b.replace('⚠','')+'</span>';
+      if(b==='承上'||b==='据下'||b==='据上') return '<span class="tag-ok">'+b+'</span>';
+      return '<span class="tag-no">'+b+'</span>';
+    }).join(' ');
+
+    rows += '<tr'+(y.isDong?' class="dong-row"':'')+'>'+
+      '<td><strong>'+pname+'</strong>'+(y.isDong?'<span class="dong-badge">动</span>':'')+'<br><span style="font-size:10px;color:var(--color-text-faint)">'+guaLabel+'</span></td>'+
+      '<td>'+(y.isYang?'<span class="tag-yang">阳 —</span>':'<span class="tag-yin">阴 - -</span>')+'</td>'+
+      '<td>'+weiTag+'</td>'+
+      '<td>'+deTag+'</td>'+
+      '<td>'+yingTag+'</td>'+
+      '<td>'+biHtml+'</td>'+
+    '</tr>';
+  }
+  rows += '</tbody>';
+  document.getElementById('yaoDetailTable').innerHTML = rows;
+}
+// =================== END 六爻详解 ===================
+
+// 复制功能
+function copySummary(btn) {
+  const text = document.getElementById('summaryText').textContent;
+  navigator.clipboard.writeText(text).then(()=>{
+    btn.textContent='已复制 ✓';btn.classList.add('copied');
+    setTimeout(()=>{btn.textContent='复制';btn.classList.remove('copied');},2000);
+  }).catch(()=>{
+    const ta=document.createElement('textarea');ta.value=text;document.body.appendChild(ta);ta.select();document.execCommand('copy');document.body.removeChild(ta);
+    btn.textContent='已复制 ✓';btn.classList.add('copied');
+    setTimeout(()=>{btn.textContent='复制';btn.classList.remove('copied');},2000);
+  });
+}
+
+// 主题切换
+(function(){
+  const t=document.querySelector('[data-theme-toggle]'),r=document.documentElement;
+  let d=matchMedia('(prefers-color-scheme:dark)').matches?'dark':'light';
+  r.setAttribute('data-theme',d);
+  t&&t.addEventListener('click',()=>{
+    d=d==='dark'?'light':'dark';r.setAttribute('data-theme',d);
+    t.innerHTML=d==='dark'?
+      '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>':
+      '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>';
+  });
+})();
+
+document.addEventListener('keydown',e=>{if(e.key==='Enter')calc();});
+</script>
+</body>
+</html>
